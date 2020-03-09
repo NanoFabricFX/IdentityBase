@@ -29,7 +29,6 @@ namespace IdentityBase.Actions.AccountChangePassword
             UserAccountService userAccountService,
             IUserAccountStore userAccountStore,
             AuthenticationService authService)
-
         {
             this.InteractionService = interaction;
             this.Localizer = localizer;
@@ -75,8 +74,10 @@ namespace IdentityBase.Actions.AccountChangePassword
                 userAccount.PasswordHash,
                 inputModel.PasswordCurrent))
             {
-                this.AddModelStateError("PasswordCurrent",
-        "Current password does not match");
+                this.AddModelStateError(
+                    "PasswordCurrent",
+                    "Current password does not match"
+                );
 
                 return this.RedirectToInitialAction();
             }
@@ -94,7 +95,7 @@ namespace IdentityBase.Actions.AccountChangePassword
         private IActionResult RedirectToInitialAction()
         {
             return this.RedirectToRoute(
-    "AccountChangePassword",
+                "AccountChangePassword",
                 new { clientId = this.IdentityBaseContext.Client.ClientId }
             );
         }

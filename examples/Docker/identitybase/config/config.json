@@ -1,3 +1,4 @@
+
 {
   "Host": {
     "Urls": "http://*:5000",
@@ -12,15 +13,7 @@
       }
     },
     "WriteTo": [
-      { "Name": "Console" },
-      {
-        "Name": "RollingFile",
-        "Args": {
-          "formatter": "Serilog.Formatting.Json.JsonFormatter, Serilog",
-          "pathFormat": "./logs/identitybase.json",
-          "fileSizeLimitBytes": 1234567
-        }
-      }
+      { "Name": "Console" }
     ],
     "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId", "RemoteIpAddress" ]
   },
@@ -35,7 +28,6 @@
     "LoginAfterAccountCreation": false,
     "LoginAfterAccountConfirmation": true,
     "LoginAfterAccountRecovery": true,
-    "CancelAfterAccountRecovery": false,
     "LoginAfterAccountInvitation": true,
     "VerificationKeyLifetime": 86400,
     "EnableAccountRegistration": true,
@@ -49,20 +41,13 @@
     "WindowsAuthenticationEnabled": false,
     "WindowsAuthenticationSchemes": [ "Negotiate", "NTLM" ],
     "WindowsAuthenticationDisplayName": "Windows",
-    "TempPath": "./temp",
+    "TempPath": "/tmp",
     "PluginsPath": "./plugins"
   },
   "Plugins": [
     "DefaultTheme",
-    "IdentityBase.WebApi",
-    //"IdentityBase.EntityFramework.InMemory",
-    //"IdentityBase.EntityFramework.MySql",
     "IdentityBase.EntityFramework.Npgsql",
-    //"IdentityBase.EntityFramework.SqlServer",
     "IdentityBase.EntityFramework.zDbInitializer"
-    //"IdentityBase.SendGrid",
-    //"IdentityBase.Smtp",
-    //"IdentityBase.Twilio"
   ],
   "EntityFramework": {
     "MigrateDatabase": true,
@@ -70,13 +55,15 @@
     "EnableTokenCleanup": false,
     "SeedExampleDataPath": "./config",
     "Npgsql": {
-      "ConnectionString": "User ID=dev;Password=dev;Host=postgres;Port=5432;Database=identitybase;Pooling=true;"
+      "MaxRetryCount": 10,
+      "MaxRetryDelay": 30,
+      "ConnectionString": "User ID=dev;Password=dev;Host=identitybase-postgres;Port=5432;Database=identitybase;Pooling=true;"
     },
     "SqlServer": {
-      "ConnectionString": "Server=sqlserver,1401;Database=IdentityBase;User ID=dev;Password=fancyStrong(!)Password"
+      "ConnectionString": "Server=identitybase-sqlserver,1401;Database=IdentityBase;User ID=dev;Password=fancyStrong(!)Password"
     },
     "MySql": {
-      "ConnectionString": "server=mysql;port=3306;database=identitybase;uid=dev;password=dev"
+      "ConnectionString": "server=identitybase-mysql;port=3306;database=identitybase;uid=dev;password=dev"
     }
   },
   "Events": {
@@ -92,8 +79,14 @@
     }
   },
   "WebApi": {
-    "AutorityUrl": "http://localhost:5000",
+    "AutorityUrl": "http://auth.identitybase.local",
     "ApiSecret": "secret",
     "EnableSwagger": true
+  },
+  "Email": {
+
+  },
+  "Sms": {
+
   }
 }

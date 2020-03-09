@@ -31,7 +31,7 @@ namespace IdentityBase.Configuration
             ICryptoService cryptoService,
             ApplicationOptions options)
         {
-            var now = DateTime.UtcNow;
+            DateTime now = DateTime.UtcNow;
 
             var users = new List<UserAccount>
             {
@@ -48,7 +48,7 @@ namespace IdentityBase.Configuration
                     CreatedAt = now,
                     UpdatedAt = now,
                     IsEmailVerified = true,
-                    IsLoginAllowed = true,
+                    IsActive = true,
 
                     Claims = new List<UserAccountClaim>
                     {
@@ -80,6 +80,7 @@ namespace IdentityBase.Configuration
                             IdentityServerConstants.ClaimValueTypes.Json)
                     }
                 },
+
                 // Active user account 
                 new UserAccount
                 {
@@ -93,7 +94,7 @@ namespace IdentityBase.Configuration
                     CreatedAt = now,
                     UpdatedAt = now,
                     IsEmailVerified = true,
-                    IsLoginAllowed = true,
+                    IsActive = true,
 
                     Claims = new List<UserAccountClaim>
                     {
@@ -128,7 +129,7 @@ namespace IdentityBase.Configuration
                     }
                 },
                 
-                // Inactive user account with local account but no external accounts
+                // Inactive user account 
                 new UserAccount
                 {
                     Id = Guid.Parse("6b13d17c-55a6-482e-96b9-dc784015f927"),
@@ -142,11 +143,13 @@ namespace IdentityBase.Configuration
                     UpdatedAt = now,
                     IsEmailVerified = true,
                     EmailVerifiedAt = now,
-                    IsLoginAllowed = false,
+                    IsActive = false,
                     Claims = CreateClaims("Jim Panse", "Jim", "Panse"),
                 },
 
-                // Not verified user account with local account but no external accounts
+                // Active user account with not verified email
+                // http://localhost:5000/register/confirm?key=e41935fbff4d4c61176fa0a50491963ffd192fa26f709e2c99034e33b0d386b9&clientId=mvc&culture=en-US
+                // http://localhost:5000/register/cancel?key=e41935fbff4d4c61176fa0a50491963ffd192fa26f709e2c99034e33b0d386b9&clientId=mvc&culture=en-US
                 new UserAccount
                 {
                     Id = Guid.Parse("13808d08-b1c0-4f28-8d3e-8c9a4051efcb"),
@@ -158,12 +161,39 @@ namespace IdentityBase.Configuration
                     CreatedAt = now,
                     UpdatedAt = now,
                     IsEmailVerified = false,
-                    IsLoginAllowed = false,
-                    Claims = CreateClaims("Paul Panzer", "Paul", "Panzer")
-                    // TODO: set VerificationKey, VerificationPurpose, VerificationKeySentAt
+                    IsActive = true,
+                    Claims = CreateClaims("Paul Panzer", "Paul", "Panzer"),
+                    VerificationKey = "e41935fbff4d4c61176fa0a50491963ffd192fa26f709e2c99034e33b0d386b9",
+                    VerificationKeySentAt = now,
+                    VerificationPurpose = 3,
+                    VerificationStorage =
+                        "/connect/authorize/callback?client_id=mvc&redirect_uri=http%3A%2F%2Flocalhost%3A5002%2Fsignin-oidc&response_type=code%20id_token&scope=openid%20profile%20email%20api1%20idbase%20offline_access&response_mode=form_post&nonce=636797153419167400.MGFjMWNjYmYtMTE1YS00YWY1LWI2ZWMtMzdkZjEzY2Q5OGY3MWNmYzI4MmYtZGE3NS00MGE1LWJkNzgtZGQzZTYzNzY0MjZm&culture=en-US&state=CfDJ8JQ-mps0lj9HjFm5hrrJZyhB2X5bLQyFqkdLryEawVpBjagMoql-6iZVsSXWZxS77aNnlb4Mti_i57k6c8_Z7iUWsuCNrq1gfL9zWygRrfUHpAHPI5HvEC0tnEANmhzuFaorgsli0Ij3q4p2pxqKYja34_sqyD-_zNffMnnfKDj2d5oqsnPCuUL4a5690I8IFZ_7jpFz3SQkWlnEJPL7P2dKS7faO0K0cfZXeY06HGTaY34LpuDIwHgts39lZNGzR6pZ2RZhV2pvxuheWzZg-tC2jPDnYDYmBAPQ52G_B8ETYzfIrbg-5NOre5bVr757Y8ibpO5Fne-mybTR2rhtHTM&x-client-SKU=ID_NETSTANDARD1_4&x-client-ver=5.2.0.0"
                 },
 
-                // External user account
+                // User account with password reset confirmation
+                // http://localhost:5000/recover/confirm?key=de638ef442b0095a0d99031898d6b6a311358d481669a85bb7ed78b2b3504d43&clientId=mvc&culture=en-US
+                // http://localhost:5000/recover/cancel?key=de638ef442b0095a0d99031898d6b6a311358d481669a85bb7ed78b2b3504d43&clientId=mvc&culture=en-US
+                new UserAccount
+                {
+                    Id = Guid.Parse("e738f782-ed25-4fd2-8c46-9bc36fdd70a0"),
+                    Email = "jack@localhost",
+                    PasswordHash  = cryptoService.HashPassword(
+                        "jack@localhost",
+                        options.PasswordHashingIterationCount),
+
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    IsEmailVerified = false,
+                    IsActive = true,
+                    Claims = CreateClaims("Jack Bauer", "Jack", "Bauer"),
+                    VerificationKey = "de638ef442b0095a0d99031898d6b6a311358d481669a85bb7ed78b2b3504d43",
+                    VerificationKeySentAt = now,
+                    VerificationPurpose = 0,
+                    VerificationStorage =
+                        "/connect/authorize/callback?client_id=mvc&redirect_uri=http%3A%2F%2Flocalhost%3A5002%2Fsignin-oidc&response_type=code%20id_token&scope=openid%20profile%20email%20api1%20idbase%20offline_access&response_mode=form_post&nonce=636797178235288011.NWNiNDk2ZWQtN2MwNC00OTA5LTljNWQtNmJmOGQ1NDY5ZGIzMzRiNGM0OTEtMmVkNy00Y2ZkLTlkM2QtMmFlMDk0YzhhNjE3&culture=en-US&state=CfDJ8JQ-mps0lj9HjFm5hrrJZyggvttdEHRL23FvYe60bS3vgeYNJ9amoa1_Dp8jcwT8KOZGTNC85gJJOQ_iFeGGDXxuJxW_MayOPkHFWaeoBvH2pBS-AqArBg0TPprN6NzcV8x7p_JaSREvmTU9pz-aMsmKeWrcgq5L5_Vbw-P8Zv8QrfqtSlY7QXkzgsMiZm6bLvPhSGzUODv_hPHK2PTIJq4_gqwiq7FRk2d6XEpTBaMfwl_C4qx1Vbe4OkpWylCi6IYu8xN0yrMusKgHqMNHr2EfTNPW4DwL6sC-QeBIxXzQU0Eey17zLrZQEtJwVKNQfOAFzL43zvcyj0WUPZebRbs&x-client-SKU=ID_NETSTANDARD1_4&x-client-ver=5.2.0.0"
+                },
+                
+                // User account with only external user account
                 new UserAccount
                 {
                     Id = Guid.Parse("58631b04-9be5-454a-aa1d-f679cd454fa6"),
@@ -173,7 +203,7 @@ namespace IdentityBase.Configuration
                     // had never confirmed the email, since he got via facebook
                     IsEmailVerified = false,
                     // is allowed to login since he registed via facebook
-                    IsLoginAllowed = true,  
+                    IsActive = true,
                     Claims = CreateClaims("Bill Smith", "Bill", "Smith"),
                     Accounts = new List<ExternalAccount>()
                     {
@@ -195,358 +225,59 @@ namespace IdentityBase.Configuration
         {
             return new List<Client>
             {
-                ///////////////////////////////////////////
-                // Console Client Credentials Flow Sample
-                //////////////////////////////////////////
+                // client credentials client
+           
                 new Client
-                {   
+                {
                     ClientId = "client",
-                    ClientSecrets =
-                    {
-                        new Secret("secret".Sha256())
-                    },
-
                     AllowedGrantTypes = GrantTypes.ClientCredentials,
-                    AllowedScopes = {
+
+                    ClientSecrets =
+                    {
+                        new Secret("secret".Sha256())
+                    },
+                    AllowedScopes = { "api1" }
+                },
+
+                // resource owner password grant client
+                new Client
+                {
+                    ClientId = "ro.client",
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
+
+                    ClientSecrets =
+                    {
+                        new Secret("secret".Sha256())
+                    },
+                    AllowedScopes = { "api1" }
+                },
+
+                // OpenID Connect hybrid flow and client credentials client (MVC)
+                new Client
+                {
+                    ClientId = "mvc",
+                    ClientName = "MVC Client",
+                    AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
+
+                    RequireConsent = true,
+
+                    ClientSecrets =
+                    {
+                        new Secret("secret".Sha256())
+                    },
+
+                    RedirectUris = { "http://localhost:5002/signin-oidc" },
+                    PostLogoutRedirectUris = { "http://localhost:5002/signout-callback-oidc" },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
                         "api1",
-                        "api2.read_only",
                         "idbase"
-                    }
-                },
-
-                ///////////////////////////////////////////
-                // Console Client Credentials Flow with client JWT assertion
-                //////////////////////////////////////////
-                new Client
-                {
-                    ClientId = "client.jwt",
-                    ClientSecrets =
-                    {
-                        new Secret
-                        {
-                            Type = IdentityServerConstants
-                                .SecretTypes.X509CertificateBase64,
-
-                            Value = "MIIDATCCAe2gAwIBAgIQoHUYAquk9rBJcq8W+F0FAzAJBgUrDgMCHQUAMBIxEDAOBgNVBAMTB0RldlJvb3QwHhcNMTAwMTIwMjMwMDAwWhcNMjAwMTIwMjMwMDAwWjARMQ8wDQYDVQQDEwZDbGllbnQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDSaY4x1eXqjHF1iXQcF3pbFrIbmNw19w/IdOQxbavmuPbhY7jX0IORu/GQiHjmhqWt8F4G7KGLhXLC1j7rXdDmxXRyVJBZBTEaSYukuX7zGeUXscdpgODLQVay/0hUGz54aDZPAhtBHaYbog+yH10sCXgV1Mxtzx3dGelA6pPwiAmXwFxjJ1HGsS/hdbt+vgXhdlzud3ZSfyI/TJAnFeKxsmbJUyqMfoBl1zFKG4MOvgHhBjekp+r8gYNGknMYu9JDFr1ue0wylaw9UwG8ZXAkYmYbn2wN/CpJl3gJgX42/9g87uLvtVAmz5L+rZQTlS1ibv54ScR2lcRpGQiQav/LAgMBAAGjXDBaMBMGA1UdJQQMMAoGCCsGAQUFBwMCMEMGA1UdAQQ8MDqAENIWANpX5DZ3bX3WvoDfy0GhFDASMRAwDgYDVQQDEwdEZXZSb290ghAsWTt7E82DjU1E1p427Qj2MAkGBSsOAwIdBQADggEBADLje0qbqGVPaZHINLn+WSM2czZk0b5NG80btp7arjgDYoWBIe2TSOkkApTRhLPfmZTsaiI3Ro/64q+Dk3z3Kt7w+grHqu5nYhsn7xQFAQUf3y2KcJnRdIEk0jrLM4vgIzYdXsoC6YO+9QnlkNqcN36Y8IpSVSTda6gRKvGXiAhu42e2Qey/WNMFOL+YzMXGt/nDHL/qRKsuXBOarIb++43DV3YnxGTx22llhOnPpuZ9/gnNY7KLjODaiEciKhaKqt/b57mTEz4jTF4kIg6BP03MUfDXeVlM1Qf1jB43G2QQ19n5lUiqTpmQkcfLfyci2uBZ8BkOhXr3Vk9HIk/xBXQ="
-                        }
                     },
-
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
-                    AllowedScopes = {
-                        "api1",
-                        "api2.read_only"
-                    }
-                },
-
-                ///////////////////////////////////////////
-                // Custom Grant Sample
-                //////////////////////////////////////////
-                new Client
-                {
-                    ClientId = "client.custom",
-                    ClientSecrets =
-                    {
-                        new Secret("secret".Sha256())
-                    },
-
-                    AllowedGrantTypes = {
-                        "custom",
-                        "custom.nosubject"
-                    },
-                    AllowedScopes = {
-                        "api1",
-                        "api2.read_only"
-                    }
-                },
-
-                ///////////////////////////////////////////
-                // Console Resource Owner Flow Sample
-                //////////////////////////////////////////
-                new Client
-                {
-                    ClientId = "roclient",
-                    ClientSecrets =
-                    {
-                        new Secret("secret".Sha256())
-                    },
-
-                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-
-                    AllowOfflineAccess = true,
-                    AllowedScopes =
-                    {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        "custom.profile",
-                        "api1",
-                        "api2.read_only"
-                    }
-                },
-
-                ///////////////////////////////////////////
-                // Console Public Resource Owner Flow Sample
-                //////////////////////////////////////////
-                new Client
-                {
-                    ClientId = "roclient2",
-                    RequireClientSecret = false,
-
-                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-
-                    AllowOfflineAccess = true,
-                    AllowedScopes =
-                    {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Email,
-                        "api1",
-                        "api2.read_only"
-                    }
-                },
-
-                ///////////////////////////////////////////
-                // Console Hybrid with PKCE Sample
-                //////////////////////////////////////////
-                new Client
-                {
-                    ClientId = "console.hybrid.pkce",
-                    ClientName = "Console Hybrid with PKCE Sample",
-                    RequireClientSecret = false,
-
-                    AllowedGrantTypes = GrantTypes.Hybrid,
-                    RequirePkce = true,
-
-                    RedirectUris = { "http://127.0.0.1" },
-
-                    AllowOfflineAccess = true,
-
-                    AllowedScopes =
-                    {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile,
-                        IdentityServerConstants.StandardScopes.Email,
-                        "api1",
-                        "api2.read_only"
-                    }
-                },
-
-                ///////////////////////////////////////////
-                // Introspection Client Sample
-                //////////////////////////////////////////
-                new Client
-                {
-                    ClientId = "roclient.reference",
-                    ClientSecrets =
-                    {
-                        new Secret("secret".Sha256())
-                    },
-
-                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-                    AllowedScopes = {
-                        "api1",
-                        "api2.read_only"
-                    },
-
-                    AccessTokenType = AccessTokenType.Reference
-                },
-
-                ///////////////////////////////////////////
-                // MVC Implicit Flow Samples
-                //////////////////////////////////////////
-                new Client
-                {
-                    ClientId = "mvc.implicit",
-                    ClientName = "MVC Implicit",
-                    ClientUri = "http://identityserver.io",
-
-                    AllowedGrantTypes = GrantTypes.Implicit,
-                    AllowAccessTokensViaBrowser = true,
-
-                    RedirectUris =  {
-                        "http://localhost:44077/signin-oidc"
-                    },
-
-                    FrontChannelLogoutUri =
-                        "http://localhost:44077/signout-oidc",
-
-                    PostLogoutRedirectUris = {
-                        "http://localhost:44077/signout-callback-oidc"
-                    },
-
-                    AllowedScopes =
-                    {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile,
-                        IdentityServerConstants.StandardScopes.Email,
-                        "api1",
-                        "api2.read_only"
-                    }
-                },
-
-                ///////////////////////////////////////////
-                // MVC Manual Implicit Flow Sample
-                //////////////////////////////////////////
-                new Client
-                {
-                    ClientId = "mvc.manual",
-                    ClientName = "MVC Manual",
-                    ClientUri = "http://identityserver.io",
-
-                    AllowedGrantTypes = GrantTypes.Implicit,
-
-                    RedirectUris = {
-                        "http://localhost:44078/home/callback"
-                    },
-
-                    FrontChannelLogoutUri =
-                        "http://localhost:44078/signout-oidc",
-
-                    PostLogoutRedirectUris = {
-                        "http://localhost:44078/"
-                    },
-
-                    AllowedScopes = {
-                        IdentityServerConstants.StandardScopes.OpenId
-                    }
-                },
-
-                ///////////////////////////////////////////
-                // MVC Hybrid Flow Samples
-                //////////////////////////////////////////
-                new Client
-                {
-                    ClientId = "mvc.hybrid",
-                    ClientName = "MVC Hybrid",
-                    ClientUri = "http://localhost:21402",
-                    //LogoUri = "https://pbs.twimg.com/profile_images/1612989113/Ki-hanja_400x400.png",
-
-                    ClientSecrets =
-                    {
-                        new Secret("secret".Sha256())
-                    },
-
-                    AllowedGrantTypes = GrantTypes.Hybrid,
-                    AllowAccessTokensViaBrowser = false,
-
-                    RedirectUris = {
-                        "http://localhost:21402/signin-oidc"
-                    },
-
-                    FrontChannelLogoutUri =
-                        "http://localhost:21402/signout-oidc",
-
-                    PostLogoutRedirectUris = {
-                        "http://localhost:21402/signout-callback-oidc"
-                    },
-
-                    AllowOfflineAccess = true,
-
-                    AllowedScopes =
-                    {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile,
-                        IdentityServerConstants.StandardScopes.Email,
-                        "api1",
-                        "api2.read_only",
-                        "idbase"
-                    }
-                },
-
-                ///////////////////////////////////////////
-                // JS PhoneGap Sample
-                //////////////////////////////////////////
-                new Client
-                { 
-                    ClientId = "phonegapclient",
-                    ClientName = "PhoneGap Client",
-                    AccessTokenType = AccessTokenType.Reference,
-                    AccessTokenLifetime = 330,
-                    IdentityTokenLifetime = 300,
-                    AllowedGrantTypes = GrantTypes.Implicit,
-                    AllowAccessTokensViaBrowser = true,
-                    RedirectUris = new List<string>
-                    {
-                        "http://localhost:3000"
-                    },
-                    PostLogoutRedirectUris = new List<string>
-                    {
-                        "http://localhost:3000"
-                    },
-                    AllowedCorsOrigins = new List<string>
-                    {
-                        "http://localhost:3000"
-                    },
-                    AllowedScopes = new List<string>
-                    {
-                        "openid",
-                        "role",
-                        "profile",
-                        "email",
-                        "api1",
-                        "api2.read_only"
-                    }
-                },
-
-                ///////////////////////////////////////////
-                // JS OAuth 2.0 Sample
-                //////////////////////////////////////////
-                new Client
-                {
-                    ClientId = "js_oauth",
-                    ClientName = "JavaScript OAuth 2.0 Client",
-                    ClientUri = "http://identityserver.io",
-                    //LogoUri = "https://pbs.twimg.com/profile_images/1612989113/Ki-hanja_400x400.png",
-
-                    AllowedGrantTypes = GrantTypes.Implicit,
-                    AllowAccessTokensViaBrowser = true,
-
-                    RedirectUris = {
-                        "http://localhost:28895/index.html"
-                    },
-                    AllowedScopes = {
-                        "api1",
-                        "api2.read_only"
-                    }
-                },
-                
-                ///////////////////////////////////////////
-                // JS OIDC Sample
-                //////////////////////////////////////////
-                new Client
-                {
-                    ClientId = "js_oidc",
-                    ClientName = "JavaScript OIDC Client",
-                    ClientUri = "http://identityserver.io",
-                    //LogoUri = "https://pbs.twimg.com/profile_images/1612989113/Ki-hanja_400x400.png",
-
-                    AllowedGrantTypes = GrantTypes.Implicit,
-                    AllowAccessTokensViaBrowser = true,
-                    RequireClientSecret = false,
-                    AccessTokenType = AccessTokenType.Jwt,
-
-                    RedirectUris =
-                    {
-                        "http://localhost:7017/index.html",
-                        "http://localhost:7017/callback.html",
-                        "http://localhost:7017/silent.html",
-                        "http://localhost:7017/popup.html"
-                    },
-
-                    PostLogoutRedirectUris = {
-                        "http://localhost:7017/index.html"
-                    },
-
-                    AllowedCorsOrigins = {
-                        "http://localhost:7017"
-                    },
-
-                    AllowedScopes =
-                    {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile,
-                        IdentityServerConstants.StandardScopes.Email,
-                        "api1",
-                        "api2.read_only",
-                        "api2.full_access"
-                    }
+                    AllowOfflineAccess = true
                 }
             };
         }
@@ -560,7 +291,7 @@ namespace IdentityBase.Configuration
                 new IdentityResources.Profile(),
                 new IdentityResources.Email(),
 
-                // custom identity resource with some consolidated claims
+                // Custom identity resource with some consolidated claims
                 new IdentityResource("custom.profile", new[] {
                     JwtClaimTypes.Name,
                     JwtClaimTypes.Email,
@@ -577,40 +308,12 @@ namespace IdentityBase.Configuration
                 new ApiResource("api1", "Some API 1")
                 {
                     // this is needed for introspection when using reference tokens
-                    ApiSecrets = { new Secret("secret".Sha256()) }
-                },
-
-                // expanded version if more control is needed
-                new ApiResource
-                {
-                    Name = "api2",
-
-                    ApiSecrets =
-                    {
+                    ApiSecrets = {
                         new Secret("secret".Sha256())
-                    },
-
-                    UserClaims =
-                    {
-                        JwtClaimTypes.Name,
-                        JwtClaimTypes.Email
-                    },
-
-                    Scopes =
-                    {
-                        new Scope()
-                        {
-                            Name = "api2.full_access",
-                            DisplayName = "Full access to API 2",
-                        },
-                        new Scope
-                        {
-                            Name = "api2.read_only",
-                            DisplayName = "Read only access to API 2"
-                        }
                     }
                 },
 
+                // IdentityBase API for invitation and other features
                 new ApiResource
                 {
                     Name = "idbase",
@@ -628,7 +331,7 @@ namespace IdentityBase.Configuration
                             Name = "idbase",
                             DisplayName =
                                 "Full access to IdentityBase API",
-                        }                        
+                        }
                     }
                 }
             };

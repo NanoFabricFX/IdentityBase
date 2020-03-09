@@ -15,6 +15,7 @@ namespace IdentityBase.Actions.Recover
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
+    using ServiceBase.Extensions;
     using ServiceBase.Mvc;
     using ServiceBase.Notification.Email;
 
@@ -38,7 +39,8 @@ namespace IdentityBase.Actions.Recover
             IUserAccountStore userAccountStore,
             UserAccountService userAccountService,
             NotificationService notificationService,
-            AuthenticationService authenticationService)
+            AuthenticationService authenticationService,
+            IEmailProviderInfoService emailProviderInfoService)
         {
             this.InteractionService = interaction;
             this.Localizer = localizer;
@@ -50,6 +52,7 @@ namespace IdentityBase.Actions.Recover
             this._userAccountService = userAccountService;
             this._notificationService = notificationService;
             this._authenticationService = authenticationService;
+            this._emailProviderInfoService = emailProviderInfoService;
         }
 
         [HttpGet("/recover", Name = "Recover")]
@@ -76,14 +79,14 @@ namespace IdentityBase.Actions.Recover
                     new { ReturnUrl = model.ReturnUrl }
                 );
             }
-
+                        
             // Check if user with same email exists
             UserAccount userAccount = await this._userAccountStore
                 .LoadByEmailAsync(model.Email);
 
             if (userAccount != null)
             {
-                if (userAccount.IsLoginAllowed)
+                if (userAccount.IsActive)
                 {
                     this._userAccountService.SetVerificationData(
                             userAccount,
@@ -105,12 +108,18 @@ namespace IdentityBase.Actions.Recover
                 }
                 else
                 {
-                    this.AddModelStateError(ErrorMessages.UserAccountIsDeactivated);
+                    // TODO: return propper view model instead of input model with apropriate flags 
+                    this.AddModelStateError(
+                        nameof(RecoverInputModel.Email),
+                        ErrorMessages.UserAccountIsInactive);
                 }
             }
             else
             {
-                this.AddModelStateError(ErrorMessages.UserAccountDoesNotExists);
+                // TODO: return propper view model instead of input model with apropriate flags 
+                this.AddModelStateError(
+                    nameof(RecoverInputModel.Email),
+                    ErrorMessages.UserAccountDoesNotExists);
             }
 
             // there was an error
@@ -174,6 +183,7 @@ namespace IdentityBase.Actions.Recover
         }
 
         [HttpGet("/recover/confirm", Name = "RecoverConfirm")]
+        [RestoreModelState]
         public async Task<IActionResult> Confirm([FromQuery]string key)
         {
             TokenVerificationResult result = await this._userAccountService
@@ -201,6 +211,7 @@ namespace IdentityBase.Actions.Recover
 
         [HttpPost("/recover/confirm", Name = "RecoverConfirm")]
         [ValidateAntiForgeryToken]
+        [StoreModelState]
         public async Task<IActionResult> Confirm(
             [FromQuery]string key,
             ConfirmInputModel model)
@@ -235,9 +246,10 @@ namespace IdentityBase.Actions.Recover
 
             if (!ModelState.IsValid)
             {
-                return View(new ConfirmViewModel
-                {
-                    Email = userAccount.Email
+                return this.RedirectToRoute("RecoverConfirm", new {
+                    key = key,
+                    clientId = this.Request.Query["clientId"],
+                    culture = this.Request.Query["culture"]
                 });
             }
 

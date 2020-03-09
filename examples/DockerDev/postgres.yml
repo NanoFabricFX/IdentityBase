@@ -1,0 +1,14 @@
+version: "2.0"
+
+services:
+  postgres:
+    container_name: identitybase-dev-postgres
+    image: postgres:9.6.9-alpine
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+      - 5433:5433
+    environment:
+      - POSTGRES_DB=identitybase
+      - POSTGRES_PASSWORD=dev
+      - POSTGRES_USER=dev

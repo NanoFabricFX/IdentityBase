@@ -29,14 +29,6 @@ namespace IdentityBase.Configuration
         /// </summary>
         public bool RequireLocalAccountVerification { get; set; } = true;
 
-        // External account options
-
-        /// <summary>
-        /// If enabled users have to confirm the registration if the come from
-        /// third party IDP
-        /// </summary>
-        public bool RequireExternalAccountVerification { get; set; } = false;
-
         // Common options
 
         /// <summary>
@@ -90,21 +82,21 @@ namespace IdentityBase.Configuration
         /// email matches.
         /// </summary>
         public bool AutomaticAccountMerge { get; set; } = true;
-
-        /// <summary>
-        /// Enables "Remember Me" option for login. 
-        /// </summary>
-        public bool EnableRememberLogin { get; set; } = true;
-
+   
         /// <summary>
         /// Enables local account login form. 
         /// </summary>
         public bool EnableAccountLogin { get; set; } = true;
 
         /// <summary>
+        /// Enables "Remember Me" option for login. 
+        /// </summary>
+        public bool EnableRememberMe { get; set; } = false;
+
+        /// <summary>
         /// How long should Remember Login last in seconds.
         /// </summary>
-        public double RememberMeLoginDuration { get; set; } = 28800; // 8 hours
+        public double RememberMeDuration { get; set; } = 28800; // 8 hours
 
         public bool ShowLogoutPrompt { get; set; } = false;
 
@@ -131,6 +123,6 @@ namespace IdentityBase.Configuration
         /// user account, instead a generic message will be displayed and a
         /// mail with further information will be sent to the user account email.
         /// </summary>
-        public bool ObfuscateUserAccountPresence { get; set; } = false; 
+        public bool ObfuscateUserAccountPresence { get; set; } = false;
     }
 }

@@ -36,7 +36,7 @@
     "LoginAfterAccountConfirmation": true,
     "LoginAfterAccountRecovery": true,
     "LoginAfterAccountInvitation": true,
-    "VerificationKeyLifetime": 86400,
+    "VerificationKeyLifetime": 9986400,
     "EnableAccountRegistration": true,
     "EnableAccountRecovery": true,
     "AutomaticAccountMerge": true,
@@ -53,7 +53,7 @@
   },
   "Plugins": [
     "DefaultTheme",
-    "IdentityBase.WebApi",
+    //"IdentityBase.WebApi",
     "IdentityBase.EntityFramework.InMemory",
     //"IdentityBase.EntityFramework.MySql",
     //"IdentityBase.EntityFramework.Npgsql",
@@ -70,6 +70,8 @@
     "EnableTokenCleanup": false,
     "SeedExampleDataPath": "./config",
     "Npgsql": {
+      "MaxRetryCount": 5,
+      "MaxRetryDelay": 3000,
       "ConnectionString": "User ID=dev;Password=dev;Host=localhost;Port=5432;Database=identitybase;Pooling=true;"
     },
     "SqlServer": {
@@ -98,25 +100,39 @@
     "EnableSwagger": true
   },
 
+  "Email": {
+    "Smtp": {
+      "EmailFrom": "xxxx@gmail.com",
+      "Host": "smtp.gmail.com",
+      "Port": "587",
+      "UseSsl": "true",
+      "UserName": "xxxx@gmail.com",
+      "Password": "xxxxxxx"
+    }
+  },
+
   // https://www.google.com/recaptcha/admin#list
-  //"GoogleRecaptcha": {
-  //  "SiteKey":"",
-  //  "Secret":""
-  // },
+  "GoogleRecaptcha": {
+    "EnableOnLogin": true,
+    "EnableOnRegister": true,
+    "EnableOnRecover": true,
+    "SiteKey": "xxxxxxx",
+    "Secret": "xxxxxxx"
+  },
 
   // https://docs.microsoft.com/en-us/aspnet/core/security/authentication/social/?view=aspnetcore-2.1
-  //"ThirdPartyAuth": {
-  //    "Google": {
-  //      "ClientId":"",
-  //      "ClientSecret":""
-  //    },
-  //    "Facebook": {
-  //      "ClientId":"",
-  //      "ClientSecret":""
-  //    },
-  //    "Microsoft": {
-  //      "ClientId":"",
-  //      "ClientSecret":""
-  //   }
-  // }
+  "ThirdPartyAuth": {
+    "Google": {
+      "ClientId": "xxxxxxx",
+      "ClientSecret": "xxxxxxx"
+    },
+    "Facebook": {
+      "ClientId": "xxxxxxx",
+      "ClientSecret": "xxxxxxx"
+    },
+    "Microsoft": {
+      "ClientId": "xxxxxxx",
+      "ClientSecret": "xxxxxxx"
+    }
+  }
 }

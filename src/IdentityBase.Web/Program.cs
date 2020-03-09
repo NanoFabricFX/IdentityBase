@@ -13,12 +13,13 @@ namespace IdentityBase
     {
         public static void Main(string[] args)
         {
+            // Configuration.ExampleDataWriter.Write(); 
+
             Console.WriteLine($"Process ID: {Process.GetCurrentProcess().Id}");
 
             WebHostWrapper.Start<Startup>(args, (services) =>
             {
-                services
-                    .AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+                services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             });
         }
     }

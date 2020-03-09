@@ -67,6 +67,9 @@ namespace IdentityBase.Actions.Register
         public async Task<IActionResult> RegisterPost(
             RegisterInputModel model)
         {
+            BindInputModelResult formResult = await this
+                .BindFormInputModelAsync<IRegisterBindInputModelAction>();
+
             if (!this.ModelState.IsValid)
             {
                 return this.RedirectToRoute(
@@ -86,26 +89,13 @@ namespace IdentityBase.Actions.Register
             {
                 return await this.TryCreateNewUserAccount(model);
             }
-            // User is just disabled by whatever reason
-            else if (!userAccount.IsLoginAllowed)
-            {
-                this.AddModelStateError(ErrorMessages.AccountIsDesabled);
-            }
             // If user has a password then its a local account
             else if (userAccount.HasPassword())
             {
-                // User has to follow a link in confirmation mail
-                if (this._applicationOptions.RequireLocalAccountVerification &&
-                    !userAccount.IsEmailVerified)
-                {
-                    this.AddModelStateError(ErrorMessages.ConfirmAccount);
-
-                    // TODO: show link for resent confirmation link
-                }
-
                 // If user has a password then its a local account
-                this.ModelState
-                    .AddModelError(ErrorMessages.AccountAlreadyExists);
+                this.ModelState.AddModelError(
+                    nameof (RegisterViewModel.Email),
+                    ErrorMessages.UserAccountAlreadyExists);
             }
             else
             {
@@ -143,7 +133,7 @@ namespace IdentityBase.Actions.Register
                         .ClearVerificationData(userAccount);
 
                     await this._userAccountStore.WriteAsync(userAccount);
-
+                                       
                     // TODO: emit user updated event 
                 }
 
@@ -449,8 +439,7 @@ namespace IdentityBase.Actions.Register
                 Email = model.Email,
                 FailedLoginCount = 0,
                 IsEmailVerified = false,
-                IsLoginAllowed = !this._applicationOptions
-                    .RequireLocalAccountVerification,
+                IsActive = true
             };
 
             this._userAccountService.SetPassword(userAccount, model.Password);
@@ -533,7 +522,7 @@ namespace IdentityBase.Actions.Register
         //       // TODO: cleanup
         //       userAccount.ClearVerification();
         //       var now = DateTime.UtcNow;
-        //       userAccount.IsLoginAllowed = true;
+        //       userAccount.IsActive = true;
         //       userAccount.IsEmailVerified = true;
         //       userAccount.EmailVerifiedAt = now;
         //       userAccount.UpdatedAt = now;
